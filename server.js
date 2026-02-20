@@ -5,23 +5,17 @@ const port = process.env.PORT || 3000;
 app.get('/getpasses/:userId', async (req, res) => {
     const userId = req.params.userId;
     try {
-        const response = await fetch(`https://games.roblox.com/v1/users/${userId}/games?limit=50`);
-        const gamesData = await response.json();
+        const response = await fetch(`https://www.roblox.com/users/inventory/list-json?userId=${userId}&assetTypeId=34&pageNumber=1&itemsPerPage=100`);
+        const data = await response.json();
         
         const passes = [];
-        
-        for (const game of gamesData.data || []) {
-            const passResponse = await fetch(`https://games.roblox.com/v1/games/${game.id}/game-passes?limit=100`);
-            const passData = await passResponse.json();
-            
-            for (const pass of passData.data || []) {
-                if (pass.price !== null) {
-                    passes.push({
-                        id: pass.id,
-                        name: pass.name,
-                        price: pass.price
-                    });
-                }
+        for (const item of data.Data?.Items || []) {
+            if (item.Item?.PriceInRobux !== null) {
+                passes.push({
+                    id: item.Item.AssetId,
+                    name: item.Item.Name,
+                    price: item.Item.PriceInRobux || 0
+                });
             }
         }
         
